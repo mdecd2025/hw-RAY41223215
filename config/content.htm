@@ -14,6 +14,105 @@
 <p style="padding-left: 30px;">Exam (40%) - 建立包含操作流程影片、心得以及提供檔案下載的網頁後填回自評表單</p>
 <p style="padding-left: 30px;">Final Report (30%) - 利用網頁內容進行簡報並提交 pdf 格式書面報告, 完成後填回自評表單</p>
 <h2>list</h2>
+<pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">from browser import html, document, ajax
+
+# 設定學員資料的 URL
+url = "https://mde.tw/list/2b.txt"
+
+# 定義載入資料的回呼函式
+def on_data(response):
+    if response.status != 200:
+        print("資料載入失敗，請檢查網絡或 URL 是否正確")
+        return
+    
+    data = response.text.strip().splitlines()
+    if not data or len(data) &lt; 2:
+        print("學員資料格式異常，請檢查來源文件")
+        return
+
+    all_stud = data[1:]  # 跳過標題行
+    print(f"總共有 {len(all_stud)} 名學員")
+
+    # 取得網頁中的 brython_div1
+    brython_div1 = document["brython_div1"]
+    brython_div1.clear()
+    
+    # 插入標題
+    title = html.H3("學員 GitHub 作業列表", Class="title")
+    brython_div1 &lt;= title
+    
+    # 建立無序清單
+    ul = html.UL(Class="student-list")
+    
+    for i, student in enumerate(all_stud, 1):
+        student_data = student.split(None, 1)  # 只分割一次，確保學號和 GitHub 帳號正確
+        if len(student_data) &lt; 2:
+            continue
+
+        student_id, github_account = student_data  # 取得學號 和 GitHub 帳號
+        
+        # 創建學號的超連結，指向 GitHub Repo
+        student_link = html.A(student_id, href=f"https://github.com/mdecd2025/hw-{github_account}", target="_blank", Class="student-id-link")
+
+        # 創建 repo 的超連結，指向 GitHub.io
+        repo_link = html.A("repo", href=f"https://mdecd2025.github.io/hw-{github_account}", target="_blank", Class="repo-link")
+
+        # 建立列表項目，格式為 學號 (repo)
+        list_item = html.LI()
+        list_item &lt;= student_link  # 超連結學號
+        list_item &lt;= " ("  # 在學號和 repo 之間加上括號
+        list_item &lt;= repo_link  # 超連結 repo
+        list_item &lt;= ")"  # 關閉括號
+
+        ul &lt;= list_item  # 加入清單
+    
+    brython_div1 &lt;= ul
+
+# 發送 AJAX 請求
+request = ajax.ajax()
+request.bind('complete', on_data)
+request.open('GET', url, True)
+request.send()
+
+# 加入 CSS 樣式
+style = html.STYLE("""
+    .title {
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+    .student-list {
+        list-style-type: none;
+        padding: 0;
+        text-align: center;
+    }
+    .student-list li {
+        font-size: 18px;
+        margin: 5px 0;
+    }
+    .student-id-link {
+        color: #0366d6;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    .student-id-link:hover {
+        text-decoration: underline;
+    }
+    .repo-link {
+        color: #28a745;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    .repo-link:hover {
+        text-decoration: underline;
+    }
+""")
+document &lt;= style</pre>
+<p><a href="https://mdecd2025.github.io/hw-RAY41223215/content/Brython.html?src=https://gist.githubusercontent.com/RAY41223215/fff007f1cd9af22772417666609b3c59/raw/fcb20d6228e9bdb1a7584334ceea3e45e67cfa6e/list">全部學員的作業網址</a></p>
+<p></p>
+<p></p>
+<p></p>
 <h1>Tasks</h1>
 <h2>tasks</h2>
 <p><a class="style-scope ytcp-video-info" href="https://youtu.be/XWijwHBjfmw" target="_blank">https://youtu.be/XWijwHBjfmw</a></p>
