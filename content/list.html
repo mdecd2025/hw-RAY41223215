@@ -345,8 +345,37 @@ document &lt;= style</pre>
 <p><a href="https://mdecd2025.github.io/hw-RAY41223215/content/Brython.html?src=https://gist.githubusercontent.com/RAY41223215/e512179916cfdf2a1ab88879ca679fc3/raw/909bcd1cd871f62ef84c8c5f26ccd496bb7732d6/wwww">組員連結</a></p>
 <p></p>
 <p><a href="https://youtu.be/MdnhEDDBYv4">製作影片</a></p>
-<p></p>
-<br />About << <a href='About.html'>Previous</a> <a href='Tasks.html'>Next</a> >> Tasks</div>
+<p><a href="https://www.youtube.com/watch?v=M2NspNrVsJY">ipv6製作影片</a></p>
+<pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false"># 學員編號列表 (您提供的編號)
+student_numbers = [
+    "40923137", "41023114", "41023205", "41023206", "41023210", "41023213", "41023215", "41023216",
+    "41023218", "41023232", "41023237", "41071202", "41071203", "41071204", "41223201", "41223202",
+    "41223203", "41223205", "41223206", "41223207", "41223208", "41223209", "41223210", "41223211",
+    "41223212", "41223214", "41223215", "41223216", "41223217", "41223218", "41223219", "41223220",
+    "41223221", "41223222", "41223223", "41223224", "41223225", "41223226", "41223227", "41223228",
+    "41223229", "41223230", "41223231", "41223232", "41223233", "41223234", "41223235", "41223236",
+    "41223237", "41223239", "41223240", "41223242", "41223243", "41223244", "41223245", "41223246",
+    "41223247", "41223248", "41223249", "41223250", "41223251", "41223252", "41223253", "41271217",
+    "41271236", "41271237"
+]
+
+# 使用學號生成連結
+for i, student_id in enumerate(student_numbers, 1):  # 從 1 開始計數
+    # 格式化序號為三位數 (001-066)
+    student_num = f"{i:03d}"
+    
+    # 完整的 IPv6 位址
+    full_ip = f"{base_ip}{student_num}"  # 使用學號的最後三個數字生成IPv6地址
+    # 完整的 URL
+    url = f"http://[{full_ip}]:{port}"
+    
+    # 建立連結元素
+    link = html.A(f"{student_id}", href=url, target="_blank")  # 顯示學員的學號
+    # 每個連結後加入換行
+    div &lt;= link
+    div &lt;= html.BR()</pre>
+<p><a href="https://mdecd2025.github.io/hw-RAY41223215/content/Brython.html?src=https://gist.githubusercontent.com/RAY41223215/b3e708c9f19a1c9aa4c27025aec91345/raw/e006078b80ae9f2b7fd802966f0807605c98723f/wcnmm.py">全學員ipv6列表</a></p>
+<p></p><br />About << <a href='About.html'>Previous</a> <a href='Tasks.html'>Next</a> >> Tasks</div>
         
     <!-- footer -->
       <div class="container">
