@@ -30,3 +30,5 @@ User git
 Hostname github.co
 #since Replit works for IPv4, therefore no ProxyCommand setting needed
 #ProxyCommand /usr/bin/ncat --proxy p4.cycu.org:3128 --proxy-type http %h %p
+
+41223215 網址https://mdecd2025.github.io/hw-RAY41223215/content/index.html
