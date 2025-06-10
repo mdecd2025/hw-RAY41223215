@@ -44,7 +44,7 @@ Hakim's open source work is supported by <a href="https://github.com/sponsors/ha
 - 🖌 [Try the visual editor for reveal.js at Slides.com](https://slides.com/)
 - 🎬 [Watch the reveal.js video course (paid)](https://revealjs.com/course)
 
---- 
+--- ㄍ
 <div align="center">
   MIT licensed | Copyright © 2011-2022 Hakim El Hattab, https://hakim.se
 </div>
