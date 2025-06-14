@@ -152,7 +152,97 @@ img.add_border {
 <p>影片標題: <span style="background-color: #ffff00;">國立虎尾科技大學 - 機械設計工程系 - cd2025 期末報告 - 學員學號 - 各階段影片主題<br/></span></p>
 <p><span style="background-color: #ffff00;"></span></p>
 <p><a href="./../downloads/final project.7z">/downloads/final project.7z</a> 檔案位置</p>
-<p><a class="style-scope ytcp-video-info" href="https://youtu.be/5besxJuk2bs" target="_blank">https://youtu.be/5besxJuk2bs</a> 模擬影片</p><br />Exam3 << <a href='Exam3.html'>Previous</a> <a href='Brython.html'>Next</a> >> Brython</div>
+<p><a class="style-scope ytcp-video-info" href="https://youtu.be/5besxJuk2bs" target="_blank">https://youtu.be/5besxJuk2bs</a> 模擬影片-1 把shooter和車子黏起來 利用bounding object group來實現</p>
+<p>以下是控制車子和投射器的程式檔案</p>
+<pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">from controller import Robot, Keyboard
+import time
+
+# Constants
+TIME_STEP = 32
+MAX_VELOCITY = 10.0
+ANGLE_STEP = 40 * 3.14159 / 180  # 40 degrees in radians
+POSITION_M = ANGLE_STEP          # +40 deg (擊出)
+POSITION_K = 0.0                 # 0 deg  (收回)
+KICK_DELAY = 0.5                 # 擊出後延遲時間 (秒)
+
+# Initialize robot and keyboard
+robot = Robot()
+timestep = int(robot.getBasicTimeStep())
+keyboard = Keyboard()
+keyboard.enable(timestep)
+
+# Get motor and sensor
+try:
+    motor = robot.getDevice('motor1')
+    sensor = robot.getDevice('motor1_sensor')
+    sensor.enable(timestep)
+    mechanism_enabled = True
+except Exception:
+    mechanism_enabled = False
+
+# Get wheels
+try:
+    wheels = [robot.getDevice(f"wheel{i+1}") for i in range(4)]
+    for wheel in wheels:
+        wheel.setPosition(float('inf'))  # Infinite position for velocity control
+        wheel.setVelocity(0)
+    platform_enabled = True
+except Exception:
+    platform_enabled = False
+
+# Debounce key
+key_pressed = {
+    'k': False
+}
+
+while robot.step(timestep) != -1:
+    key = keyboard.getKey()
+
+    # Platform control
+    if platform_enabled:
+        if key == Keyboard.UP:
+            for wheel in wheels:
+                wheel.setVelocity(MAX_VELOCITY)
+        elif key == Keyboard.DOWN:
+            for wheel in wheels:
+                wheel.setVelocity(-MAX_VELOCITY)
+        elif key == Keyboard.LEFT:
+            wheels[0].setVelocity(MAX_VELOCITY)
+            wheels[1].setVelocity(-MAX_VELOCITY)
+            wheels[2].setVelocity(MAX_VELOCITY)
+            wheels[3].setVelocity(-MAX_VELOCITY)
+        elif key == Keyboard.RIGHT:
+            wheels[0].setVelocity(-MAX_VELOCITY)
+            wheels[1].setVelocity(MAX_VELOCITY)
+            wheels[2].setVelocity(-MAX_VELOCITY)
+            wheels[3].setVelocity(MAX_VELOCITY)
+        elif key == ord('Q') or key == ord('q'):
+            print("Exiting...")
+            break
+        else:
+            for wheel in wheels:
+                wheel.setVelocity(0)
+
+    # Kick mechanism control
+    if mechanism_enabled:
+        if key == ord('M') or key == ord('k'):
+            if not key_pressed['M']:
+                print("[KICK] 出擊 → 收回")
+                motor.setPosition(POSITION_M)
+                
+                # 延遲（非阻塞式等待）
+                start_time = robot.getTime()
+                while robot.step(timestep) != -1:
+                    if robot.getTime() - start_time &gt;= KICK_DELAY:
+                        break
+
+                motor.setPosition(POSITION_K)
+            key_pressed['M'] = True
+        else:
+            key_pressed['M'] = False
+</pre>
+<p></p>
+<p></p><br />Exam3 << <a href='Exam3.html'>Previous</a> <a href='Brython.html'>Next</a> >> Brython</div>
         
     <!-- footer -->
       <div class="container">
