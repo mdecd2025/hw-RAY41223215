@@ -932,6 +932,124 @@ while supervisor.step(timestep) != -1:
 </pre>
 <p><a class="style-scope ytcp-video-info" href="https://youtu.be/f6KmEgIFJbw" target="_blank">https://youtu.be/f6KmEgIFJbw</a> 模擬影片</p>
 <p><a href="/downloads/final project (3).7z">/downloads/final project (3).7z</a> 這是檔案(第三版)</p>
+<p>以下是籃框的移動和偵測系統</p>
+<pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">from controller import Robot, Keyboard, Emitter
+
+# Constants
+WHEEL_RADIUS = 0.1  # Radius of the wheels in meters
+L = 0.471  # Half of the robot's length
+W = 0.376  # Half of the robot's width
+MAX_VELOCITY = 10.0  # Maximum wheel velocity
+
+# Initialize robot and keyboard
+robot = Robot()
+timestep = int(robot.getBasicTimeStep())
+keyboard = Keyboard()
+keyboard.enable(timestep)
+
+# Get emitter device for sending score
+emitter = robot.getDevice("score_emitter")
+
+# Get distance sensor
+sensor = robot.getDevice('sensor')
+sensor.enable(timestep)
+score = 0
+last_score_time = 0
+cooldown = 1.0
+
+# Get motors
+wheel5 = robot.getDevice("wheel5")  # Front-right
+wheel6 = robot.getDevice("wheel6")  # Front-left
+wheel7 = robot.getDevice("wheel7")  # Rear-right
+wheel8 = robot.getDevice("wheel8")  # Rear-left
+
+# Enable velocity control
+for wheel in [wheel5, wheel6, wheel7, wheel8]:
+    wheel.setPosition(float('inf'))
+    wheel.setVelocity(0)
+
+def set_wheel_velocity(v1, v2, v3, v4):
+    wheel5.setVelocity(v1)
+    wheel6.setVelocity(v2)
+    wheel7.setVelocity(v3)
+    wheel8.setVelocity(v4)
+
+# Lookup table for AD to distance
+lookup_table = [
+    (1000, 0.00),
+    (620, 0.12),
+    (372, 0.13),
+    (248, 0.14),
+    (186, 0.15),
+    (0, 0.18)
+]
+
+def ad_to_distance(ad_value):
+    for i in range(len(lookup_table) - 1):
+        a0, d0 = lookup_table[i]
+        a1, d1 = lookup_table[i + 1]
+        if a1 &lt;= ad_value &lt;= a0:
+            return d0 + (d1 - d0) * (ad_value - a0) / (a1 - a0)
+    if ad_value &gt; lookup_table[0][0]:
+        return lookup_table[0][1]
+    return lookup_table[-1][1]
+
+# User instructions
+print("Controls:")
+print("U = forward, J = backward, H = turn left, K = turn right, Q = quit")
+
+# Main loop
+keys = set()
+while robot.step(timestep) != -1:
+    key = keyboard.getKey()
+    while key != -1:
+        keys.add(key)
+        key = keyboard.getKey()
+
+    sensor_value = sensor.getValue()
+    distance = ad_to_distance(sensor_value)
+    current_time = robot.getTime()
+
+    if ord('M') in keys or ord('m') in keys:
+        print("Distance (M):", distance)
+    if ord('K') in keys or ord('k') in keys:
+        print("Distance (K):", distance)
+
+    if distance &lt; 0.18 and (current_time - last_score_time) &gt; cooldown:
+        score += 2
+        last_score_time = current_time
+        print("得分 +2")
+        print("Current Distance:", distance)
+        emitter.send(str(2))  # 送出得分
+
+    # Movement control
+    if ord('U') in keys or ord('u') in keys:
+        set_wheel_velocity(MAX_VELOCITY, MAX_VELOCITY, MAX_VELOCITY, MAX_VELOCITY)
+    elif ord('J') in keys or ord('j') in keys:
+        set_wheel_velocity(-MAX_VELOCITY, -MAX_VELOCITY, -MAX_VELOCITY, -MAX_VELOCITY)
+    elif ord('K') in keys or ord('k') in keys:
+        set_wheel_velocity(-MAX_VELOCITY, MAX_VELOCITY, -MAX_VELOCITY, MAX_VELOCITY)
+    elif ord('H') in keys or ord('h') in keys:
+        set_wheel_velocity(MAX_VELOCITY, -MAX_VELOCITY, MAX_VELOCITY, -MAX_VELOCITY)
+    elif ord('Q') in keys or ord('q') in keys:
+        print("Exiting...")
+        break
+    else:
+        set_wheel_velocity(0, 0, 0, 0)
+
+    keys.clear()
+</pre>
+<p><br/>以下是七段顯示器的控制系統</p>
+<p>from controller import Supervisor</p>
+<p>SEGMENTS = [<br/> [1,1,1,1,1,1,0], # 0<br/> [0,1,1,0,0,0,0], # 1<br/> [1,1,0,1,1,0,1], # 2<br/> [1,1,1,1,0,0,1], # 3<br/> [0,1,1,0,0,1,1], # 4<br/> [1,0,1,1,0,1,1], # 5<br/> [1,0,1,1,1,1,1], # 6<br/> [1,1,1,0,0,0,0], # 7<br/> [1,1,1,1,1,1,1], # 8<br/> [1,1,1,1,0,1,1], # 9<br/>]<br/>DIGIT_MATERIALS = [<br/> ['a3mat', 'b3mat', 'c3mat', 'd3mat', 'e3mat', 'f3mat', 'g3mat'], # 百<br/> ['a2mat', 'b2mat', 'c2mat', 'd2mat', 'e2mat', 'f2mat', 'g2mat'], # 十<br/> ['a1mat', 'b1mat', 'c1mat', 'd1mat', 'e1mat', 'f1mat', 'g1mat'], # 個<br/>]<br/>ON_COLOR = [0, 1, 0]<br/>OFF_COLOR = [0.05, 0.05, 0.05]</p>
+<p>def set_digit(supervisor, digit_index, value):<br/> segs = SEGMENTS[value]<br/> for i, seg_on in enumerate(segs):<br/> mat_node = supervisor.getFromDef(DIGIT_MATERIALS[digit_index][i])<br/> if mat_node:<br/> mat_node.getField('diffuseColor').setSFColor(ON_COLOR if seg_on else OFF_COLOR)<br/> else:<br/> print(f"找不到 {DIGIT_MATERIALS[digit_index][i]} 這個DEF")</p>
+<p>def set_display(supervisor, value):<br/> value = max(0, min(999, int(value)))<br/> h = value // 100<br/> t = (value // 10) % 10<br/> u = value % 10<br/> set_digit(supervisor, 0, h)<br/> set_digit(supervisor, 1, t)<br/> set_digit(supervisor, 2, u)</p>
+<p>supervisor = Supervisor()<br/>timestep = int(supervisor.getBasicTimeStep())</p>
+<p>score = 0<br/>receiver = supervisor.getDevice("score_receiver")<br/>receiver.enable(timestep)</p>
+<p>while supervisor.step(timestep) != -1:<br/> while receiver.getQueueLength() &gt; 0:<br/> data = receiver.getString()<br/> if data.isdigit():<br/> try:<br/> received_score = int(data)<br/> score += received_score<br/> print(f"收到得分訊息: +{received_score}, 總分: {score}")<br/> except Exception as e:<br/> print("訊息格式錯誤:", e)<br/> receiver.nextPacket()<br/> set_display(supervisor, score)</p>
+<p><a href="/downloads/final project (4).7z">/downloads/final project (4).7z</a> 以下是檔案位置</p>
+<p><a class="style-scope ytcp-video-info" href="https://youtu.be/_fwgpqRz49E" target="_blank">https://youtu.be/_fwgpqRz49E</a> 這是模擬影片</p>
+<p><a class="style-scope ytcp-video-info" href="https://youtu.be/RgQjZCgOqFg" target="_blank">https://youtu.be/RgQjZCgOqFg</a> 這是製作過程</p>
 <p></p><h1>Brython</h1>
 <p><button id="add1to100">1 add to 100</button></p>
 <p><br/><br/></p>
