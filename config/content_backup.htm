@@ -1047,6 +1047,9 @@ while robot.step(timestep) != -1:
 <p>supervisor = Supervisor()<br/>timestep = int(supervisor.getBasicTimeStep())</p>
 <p>score = 0<br/>receiver = supervisor.getDevice("score_receiver")<br/>receiver.enable(timestep)</p>
 <p>while supervisor.step(timestep) != -1:<br/> while receiver.getQueueLength() &gt; 0:<br/> data = receiver.getString()<br/> if data.isdigit():<br/> try:<br/> received_score = int(data)<br/> score += received_score<br/> print(f"收到得分訊息: +{received_score}, 總分: {score}")<br/> except Exception as e:<br/> print("訊息格式錯誤:", e)<br/> receiver.nextPacket()<br/> set_display(supervisor, score)</p>
+<p><a href="/downloads/final project (4).7z">/downloads/final project (4).7z</a> 以下是檔案位置</p>
+<p><a class="style-scope ytcp-video-info" href="https://youtu.be/_fwgpqRz49E" target="_blank">https://youtu.be/_fwgpqRz49E</a> 這是模擬影片</p>
+<p><a class="style-scope ytcp-video-info" href="https://youtu.be/RgQjZCgOqFg" target="_blank">https://youtu.be/RgQjZCgOqFg</a> 這是製作過程</p>
 <p></p><h1>Brython</h1>
 <p><button id="add1to100">1 add to 100</button></p>
 <p><br/><br/></p>
